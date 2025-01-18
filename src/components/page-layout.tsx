@@ -14,7 +14,9 @@ export function PageLayout({ children, title }: PageLayoutProps) {
           <h1 className="text-2xl font-bold">{title}</h1>
         </div>
       </header>
-      <main className="container mx-auto py-6 px-4">{children}</main>
+      <main className="container mx-auto py-6 px-4 grow flex flex-col">
+        {children}
+      </main>
     </SidebarInset>
   );
 }

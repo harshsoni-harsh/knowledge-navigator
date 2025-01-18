@@ -54,7 +54,7 @@ export function Dashboard() {
             />
             <Button
               type="submit"
-              className="absolute right-1 top-1/2 -translate-y-1/2 transform"
+              className="absolute right-0 top-1/2 -translate-y-1/2 transform"
               disabled={isSearching}
             >
               {isSearching ? 'Searching...' : 'Search'}

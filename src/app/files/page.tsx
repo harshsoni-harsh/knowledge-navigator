@@ -1,9 +1,9 @@
-import { BookLibrary } from '@/components/book-library';
+import { BookLibrary } from '@/components/BookLibrary';
 import { PageLayout } from '@/components/page-layout';
 
 export default function BooksPage() {
   return (
-    <PageLayout title="My Books">
+    <PageLayout title="My Files">
       <BookLibrary />
     </PageLayout>
   );

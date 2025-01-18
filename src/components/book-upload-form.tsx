@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,27 +12,62 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { uploadBook } from '@/app/actions';
 
 export function BookUploadForm() {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const uploadRef = useRef<HTMLInputElement>(null);
+
+  const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = e.target.files;
+    if (selectedFiles) {
+      const validFiles = Array.from(selectedFiles).filter((file) => {
+        if (file.type !== 'application/pdf') {
+          alert(`File "${file.name}" is not a valid PDF.`);
+          return false;
+        }
+        if (file.size > MAX_FILE_SIZE) {
+          alert(`File "${file.name}" exceeds the size limit (100MB).`);
+          return false;
+        }
+        return true;
+      });
+      setFiles(validFiles);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!file) return;
+    if (files.length === 0) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append('book', file);
+    setError(null);
 
     try {
-      await uploadBook(formData);
-      alert('Book uploaded successfully!');
-      setFile(null);
-    } catch (error) {
-      console.error('Upload failed:', error);
-      alert('Upload failed. Please try again.');
+      const formData = new FormData();
+      files.forEach((file) => {
+        formData.append('books', file); // Use 'books' as the field name
+      });
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed. Please try again.');
+      }
+
+      alert('Books uploaded successfully!');
+      setFiles([]);
+      if (uploadRef.current) {
+        uploadRef.current.value = '';
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
       setUploading(false);
     }
@@ -41,38 +76,47 @@ export function BookUploadForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Upload a New Book</CardTitle>
-        <CardDescription>Add a new book to your library</CardDescription>
+        <CardTitle>Upload New Books</CardTitle>
+        <CardDescription>Add multiple books to your library</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="book">Upload Book (PDF)</Label>
-            <div className="mt-1 flex items-center space-x-4">
-              <Input
-                id="book"
-                type="file"
-                accept=".pdf"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="hidden"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => document.getElementById('book')?.click()}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Select File
-              </Button>
-              {file && (
-                <span className="text-sm text-muted-foreground">
-                  {file.name}
-                </span>
-              )}
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <Label htmlFor="books">Upload Books (PDF)</Label>
+          <div className="flex items-center">
+            <Input
+              id="books"
+              type="file"
+              accept=".pdf"
+              onChange={handleFileChange}
+              className="hidden"
+              ref={uploadRef}
+              multiple // Allow multiple file selection
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => uploadRef.current?.click()}
+              aria-label="Select files"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Select Files
+            </Button>
           </div>
-          <Button type="submit" disabled={!file || uploading}>
-            {uploading ? 'Uploading...' : 'Upload Book'}
+          {files.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Selected files:</p>
+              <ul className="list-disc list-inside">
+                {files.map((file, index) => (
+                  <li key={index} className="text-sm text-muted-foreground">
+                    {file.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {error && <p className="text-sm text-red-500">{error}</p>}
+          <Button type="submit" disabled={files.length === 0 || uploading}>
+            {uploading ? 'Uploading...' : 'Upload Books'}
           </Button>
         </form>
       </CardContent>
