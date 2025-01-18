@@ -63,7 +63,7 @@ async function main() {
     // Clean up: Delete the temporary ZIP file
     fs.unlinkSync(tempFilePath);
     console.log('Temporary file cleaned up.');
-    process.exit(1);
+    process.exit();
   } catch (err) {
     console.error('An error occurred:', err.message);
   }
