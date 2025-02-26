@@ -1,18 +1,40 @@
+'use client';
+
 import { join } from 'path';
 import { PageLayout } from '@/components/page-layout';
 import ViewerPrebuilt from './ViewerPrebuilt';
+import { Usable, use, useEffect, useState } from 'react';
 
-export default async function Page({
+export default function Page({
   params,
 }: {
-  params: Promise<{ filename: string }>;
+  params: Usable<{ filename: string }>;
 }) {
-  const { filename } = await params;
+  const { filename } = use(params);
+  const [fileExists, setFileExists] = useState(true);
+
   const pdfPath = join('/', 'uploads', filename);
+
+  useEffect(() => {
+    const checkFile = async () => {
+      try {
+        const response = await fetch(pdfPath, { method: 'HEAD' });
+        setFileExists(response.ok);
+      } catch (error) {
+        if (error) setFileExists(false);
+      }
+    };
+
+    checkFile();
+  }, [pdfPath]);
 
   return (
     <PageLayout title="PDF Viewer">
-      <ViewerPrebuilt {...{ pdfPath }} />
+      {fileExists ? (
+        <ViewerPrebuilt {...{ pdfPath }} />
+      ) : (
+        <div className="size-full grid place-items-center">File not found</div>
+      )}
     </PageLayout>
   );
 }

@@ -1,119 +1,82 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
+import axios from 'axios';
 
 export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
+
+  // Fetch selected text meaning
+  const fetchDefinition = async (word: string) => {
+    try {
+      const response = await axios.get(
+        `${process.env.BACKEND_URI}/${encodeURIComponent(word)}`
+      );
+      return response.data.extract || 'Definition not found';
+    } catch (error) {
+      if (error) return 'Definition not found';
+    }
+  };
+
+  // Handle text selection inside the iframe
+  const handleTextSelection = useCallback(async () => {
+    const iframe = iframeRef.current;
+    const tooltip = tooltipRef.current;
+    if (!tooltip || !iframe?.contentWindow) return;
+    const selection = iframe.contentWindow.getSelection();
+    if (selection && selection.toString().trim()) {
+      const selectedText = selection.toString().trim();
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+
+      if (selectedText.length > 0) {
+        const definition = await fetchDefinition(selectedText);
+        tooltip.textContent = `${selectedText}: ${definition}`;
+
+        // Use the iframe's scroll offsets instead of the parent window's
+        tooltip.style.left = `${rect.left + iframe.contentWindow.scrollX}px`;
+        tooltip.style.top = `${rect.top + iframe.contentWindow.scrollY - 40}px`;
+        tooltip.style.display = 'block';
+      }
+    } else {
+      tooltip.style.display = 'none';
+    }
+  }, []);
+
+  const handleLoad = useCallback(() => {
+    const iframe = iframeRef.current;
+    const iframeWindow = iframe?.contentWindow;
+    const iframeDocument = iframe?.contentDocument;
+    if (!iframeWindow || !iframeDocument) return;
+
+    // Create tooltip element (only once)
+    const tooltipElement = document.createElement('div');
+    tooltipElement.className = 'tooltipAnnotation';
+    tooltipElement.style.position = 'absolute';
+    tooltipElement.style.background = 'white';
+    tooltipElement.style.border = '2px solid black';
+    tooltipElement.style.padding = '5px';
+    tooltipElement.style.zIndex = '10000';
+    tooltipElement.style.display = 'none';
+    iframeDocument.body.appendChild(tooltipElement);
+    tooltipRef.current = tooltipElement;
+
+    // Add event listener for text selection
+    iframeDocument.addEventListener('mouseup', handleTextSelection);
+  }, [handleTextSelection]);
 
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    const handleLoad = () => {
-      const iframeWindow = iframe.contentWindow;
-      const iframeDocument = iframe.contentDocument;
-
-      if (!iframeWindow || !iframeDocument) return;
-
-      // Create a tooltip element outside of the event listeners
-      const tooltip = document.createElement('div');
-      tooltip.className = 'tooltipAnnotation';
-      tooltip.style.background = 'white';
-      tooltip.style.border = '2px solid black';
-      tooltip.style.position = 'absolute';
-      tooltip.style.zIndex = '10000';
-      tooltip.style.display = 'none'; // Initially hidden
-      iframeDocument.body.appendChild(tooltip); // Append to body for positioning
-
-      // Function to handle mouseover events
-      const handleMouseOver = (event: MouseEvent) => {
-        const target = event.target as HTMLElement;
-        if (target.tagName === 'SPAN') {
-          const textContent = target.textContent?.trim();
-          if (textContent) {
-            // Highlight the hovered text
-            target.classList.add('highlight');
-
-            // Calculate tooltip position based on mouse position
-            const mouseX = event.clientX; // Mouse X coordinate
-            const mouseY = event.clientY; // Mouse Y coordinate
-
-            // Adjust tooltip position to be near the mouse cursor
-            tooltip.style.left = `${mouseX}px`; // Offset from mouse cursor
-            tooltip.style.top = `${mouseY - 40}px`; // Position above cursor
-            tooltip.textContent = textContent;
-            tooltip.style.display = 'block'; // Show the tooltip
-          }
-        }
-      };
-
-      // Function to handle mouseout events
-      const handleMouseOut = (event: MouseEvent) => {
-        const target = event.target as HTMLElement;
-        if (target.tagName === 'SPAN') {
-          target.classList.remove('highlight'); // Remove highlight
-          tooltip.style.display = 'none'; // Hide the tooltip
-        }
-      };
-      const addHoverListenersToTextLayer = (textLayer: HTMLDivElement) => {
-        textLayer.addEventListener('mouseover', handleMouseOver);
-        textLayer.addEventListener('mouseout', handleMouseOut);
-      };
-
-      // MutationObserver to detect when the text layer is added
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.addedNodes.length) {
-            const textLayers = iframeDocument.querySelectorAll('.textLayer');
-
-            textLayers.forEach((obj) => {
-              const textLayer = obj as HTMLDivElement;
-              if (textLayer) {
-                addHoverListenersToTextLayer(textLayer);
-              }
-            });
-          }
-        });
-      });
-
-      observer.observe(iframeDocument.body, { childList: true, subtree: true });
-      const checkForTextLayerExistence = () => {
-        const textLayer = iframeDocument.querySelector(
-          '.textLayer'
-        ) as HTMLDivElement;
-        if (textLayer) {
-          addHoverListenersToTextLayer(textLayer); // Reapply listeners if necessary
-        }
-      };
-
-      // Set an interval to check for new documents being loaded in the viewer
-      const intervalId = setInterval(checkForTextLayerExistence, 1000);
-
-      // Cleanup on unmount
-      return () => {
-        clearInterval(intervalId);
-        observer.disconnect(); // Disconnect observer on component unmount
-        tooltip.remove(); // Remove tooltip from DOM
-        if (iframeDocument) {
-          const textLayers = iframeDocument.querySelectorAll('.textLayer');
-
-          textLayers.forEach((obj) => {
-            const textLayer = obj as HTMLDivElement;
-            if (textLayer) {
-              textLayer.removeEventListener('mouseover', handleMouseOver);
-              textLayer.removeEventListener('mouseout', handleMouseOut);
-            }
-          });
-        }
-      };
-    };
-    // Attach load event listener to the iframe
     iframe.addEventListener('load', handleLoad);
-
     return () => {
-      iframe.removeEventListener('load', handleLoad); // Cleanup load listener on unmount
+      const tooltip = tooltipRef.current;
+      if (tooltip) tooltip.remove(); // Clean up tooltip from the DOM
+      iframe.removeEventListener('load', handleLoad);
     };
-  }, [pdfPath]);
+  }, [pdfPath, handleLoad]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>

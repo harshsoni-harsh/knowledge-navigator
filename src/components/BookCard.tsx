@@ -18,15 +18,17 @@ type BookCardProps = {
 
 export function BookCard({ book, onSelect }: BookCardProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="truncate">{book.title}</CardTitle>
-        <CardDescription>{book.author}</CardDescription>
+    <Card className="flex flex-col">
+      <CardHeader className="grow">
+        <CardTitle className="">{book.title}</CardTitle>
+        {book.author && <CardDescription>{book.author}</CardDescription>}
       </CardHeader>
-      <CardContent>
-        <p>Year: {book.year}</p>
-      </CardContent>
-      <CardFooter>
+      {book.year && (
+        <CardContent>
+          <p>Year: {book.year}</p>
+        </CardContent>
+      )}
+      <CardFooter className="">
         <div className="w-full flex">
           <Link
             href={`/files/${book.title}`}

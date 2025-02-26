@@ -12,8 +12,7 @@ export async function GET() {
       files.map(async (file) => {
         const fileStat = await stat(join(uploadDir, file));
 
-        const [title, author, yearWithExt] = file.split(' - ');
-        const year = yearWithExt?.replace('.pdf', '');
+        const title = file;
 
         return {
           filename: file,
@@ -22,8 +21,6 @@ export async function GET() {
           updatedAt: fileStat.mtime,
           metadata: {
             title: title || 'Unknown',
-            author: author || 'Unknown',
-            year: year || 'Unknown',
           },
         };
       })

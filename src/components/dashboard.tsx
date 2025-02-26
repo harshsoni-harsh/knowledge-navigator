@@ -43,20 +43,16 @@ export function Dashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSearch} className="relative">
+          <form onSubmit={handleSearch} className="relative flex">
             <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
             <Input
               type="search"
               placeholder="What would you like to explore?"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="pl-8 pr-20"
+              className="pl-8 mr-4 focus-visible:ring-0"
             />
-            <Button
-              type="submit"
-              className="absolute right-0 top-1/2 -translate-y-1/2 transform"
-              disabled={isSearching}
-            >
+            <Button type="submit" className="transform" disabled={isSearching}>
               {isSearching ? 'Searching...' : 'Search'}
             </Button>
           </form>
