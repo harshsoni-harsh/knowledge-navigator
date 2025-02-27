@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { LoaderCircle, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,20 +15,55 @@ import {
 export function Dashboard() {
   const [query, setQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [searchResults, setSearchResults] = useState<string>('');
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSearching(true);
-    // Simulating an API call
-    setTimeout(() => {
-      setSearchResults([
-        `Result 1 for "${query}"`,
-        `Result 2 for "${query}"`,
-        `Result 3 for "${query}"`,
-      ]);
-      setIsSearching(false);
-    }, 1500);
+    setSearchResults('');
+
+    if (query) {
+      const retrieveResponse = await fetch(
+        `http://localhost:8000/retrieve_from_path?question=${encodeURIComponent(query)}`
+      );
+
+      if (retrieveResponse.ok) {
+        setIsSearching(false);
+        const reader = retrieveResponse.body?.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = (await reader?.read()) || {};
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          console.log(buffer);
+
+          let boundary = buffer.indexOf('\n');
+          while (boundary !== -1) {
+            const line = buffer.substring(0, boundary).trim();
+            buffer = buffer.substring(boundary + 1);
+
+            if (line) {
+              try {
+                const data = JSON.parse(line);
+                if (data.answer) {
+                  setSearchResults((prev) =>
+                    prev ? `${prev}${data.answer}` : data.answer
+                  );
+                }
+              } catch (e) {
+                console.error('Error parsing streamed data:', e);
+              }
+            }
+            boundary = buffer.indexOf('\n');
+          }
+        }
+      } else {
+        console.error('Failed to retrieve:', retrieveResponse.statusText);
+      }
+    }
   };
 
   return (
@@ -58,13 +93,38 @@ export function Dashboard() {
           </form>
           {searchResults.length > 0 && (
             <div className="mt-4 space-y-2">
-              {searchResults.map((result, index) => (
-                <Card key={index}>
-                  <CardContent className="p-4">
-                    <p>{result}</p>
+              <Card>
+                {!isSearching ? (
+                  <CardContent className="p-4 max-w-full whitespace-pre-wrap">
+                    {searchResults
+                      .replaceAll('&nbsp;', ' ')
+                      .split(/<br\s*\/?>/)
+                      .map((line, index) => (
+                        <p key={index}>
+                          {line.split(/(https?:\/\/[^\s)]+)/g).map((part, i) =>
+                            part.match(/^https?:\/\//) ? (
+                              <a
+                                key={i}
+                                href={part}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 underline"
+                              >
+                                {part}
+                              </a>
+                            ) : (
+                              part
+                            )
+                          )}
+                        </p>
+                      ))}
                   </CardContent>
-                </Card>
-              ))}
+                ) : (
+                  <CardContent className="p-4 flex justify-center">
+                    <LoaderCircle className="animate-spin" />
+                  </CardContent>
+                )}
+              </Card>
             </div>
           )}
         </CardContent>

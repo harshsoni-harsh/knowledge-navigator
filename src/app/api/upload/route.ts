@@ -17,6 +17,27 @@ export async function POST(req: NextRequest) {
       const relativeUploadDir = `/uploads`;
       const uploadDir = join(process.cwd(), 'public', relativeUploadDir);
 
+      {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+          const uploadResponse = await fetch('http://localhost:8000/upload', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (uploadResponse.ok) {
+            const uploadData = await uploadResponse.json();
+            console.log('File uploaded successfully:', uploadData);
+          } else {
+            console.error('Failed to upload file:', uploadResponse.statusText);
+          }
+        } catch (error) {
+          console.error('Error uploading file:', error);
+        }
+      }
+
       await ensureDirectoryExists(uploadDir);
 
       await saveFile(file, uploadDir);

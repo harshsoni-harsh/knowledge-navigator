@@ -25,18 +25,9 @@ export function BookLibrary() {
 
   const booksPerPage = 6;
 
-  const filteredAndSortedBooks = books
-    .filter(
-      (book) =>
-        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (sortBy === 'year') {
-        return a.year - b.year;
-      }
-      return (a[sortBy] as string).localeCompare(b[sortBy] as string);
-    });
+  const filteredAndSortedBooks = books.filter((book) =>
+    book.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const paginatedBooks = filteredAndSortedBooks.slice(
     (currentPage - 1) * booksPerPage,
