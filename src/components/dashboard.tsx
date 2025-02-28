@@ -24,7 +24,7 @@ export function Dashboard() {
 
     if (query) {
       const retrieveResponse = await fetch(
-        `http://localhost:8000/retrieve_from_path?question=${encodeURIComponent(query)}`
+        `http://localhost:8000/retrieve?question=${encodeURIComponent(query)}`
       );
 
       if (retrieveResponse.ok) {
