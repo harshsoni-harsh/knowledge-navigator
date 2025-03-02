@@ -3,12 +3,12 @@
 import { join } from 'path';
 import { PageLayout } from '@/components/page-layout';
 import ViewerPrebuilt from './ViewerPrebuilt';
-import { Usable, use, useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 
 export default function Page({
   params,
 }: {
-  params: Usable<{ filename: string }>;
+  params: Promise<{ filename: string }>;
 }) {
   const { filename } = use(params);
   const [fileExists, setFileExists] = useState(true);
