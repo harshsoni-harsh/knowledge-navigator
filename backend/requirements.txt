@@ -1,0 +1,10 @@
+fastapi 
+langchain 
+langchain_core 
+torch 
+pdfplumber
+uvicorn
+langchain_chroma
+langchain_huggingface
+python-multipart
+accelerate

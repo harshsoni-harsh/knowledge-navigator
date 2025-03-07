@@ -1,0 +1,12 @@
+*.env
+.env*
+.venv/
+__pycache__/
+.cache/
+cache/
+*.gguf
+rag-uploads/
+chroma_langchain_db/
+tmp
+models
+tokenizers
