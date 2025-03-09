@@ -79,7 +79,7 @@ export function BookLibrary() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {paginatedBooks.map((book) => (
           <BookCard
-            key={book.name}
+            key={book.id}
             book={book}
             onSelect={() => setSelectedBook(book)}
           />

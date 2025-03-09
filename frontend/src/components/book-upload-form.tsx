@@ -64,7 +64,7 @@ export function BookUploadForm() {
                 size: file.size.toString(),
                 author: 'Unknown'
               });
-              const renamedFile = new File([file], `${id}.pdf`)
+              const renamedFile = new File([file], `${id}`)
               formData.append('books', renamedFile);
               res(file.name);
             } catch (err) {
