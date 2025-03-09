@@ -11,7 +11,12 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,html}'",
-    "lint-format": "npm run lint && npm run format"
+    "lint-format": "pnpm run lint && pnpm run format",
+    "prisma:dev": "prisma migrate dev",
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:db-pull": "prisma db pull",
+    "prisma:db-push": "prisma db push",
+    "prisma:studio": "prisma studio"
   },
   "lint-staged": {
     "*.css": [
@@ -23,6 +28,7 @@
     ]
   },
   "dependencies": {
+    "@prisma/client": "6.4.1",
     "@radix-ui/react-dialog": "^1.1.4",
     "@radix-ui/react-dropdown-menu": "^2.1.4",
     "@radix-ui/react-label": "^2.1.1",
@@ -41,6 +47,7 @@
     "mime": "^4.0.6",
     "next": "15.1.4",
     "next-themes": "^0.4.4",
+    "prisma": "^6.4.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^2.6.0",

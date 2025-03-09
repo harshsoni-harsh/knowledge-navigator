@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
+import { getAllFilesMetadata } from '@/app/actions';
 
 export function useBooks() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -9,11 +10,7 @@ export function useBooks() {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await fetch('/api/files');
-        if (!response.ok) {
-          throw new Error('Failed to fetch books');
-        }
-        const books = await response.json();
+        const books = await getAllFilesMetadata();
         setBooks(books);
       } catch (error) {
         setError(

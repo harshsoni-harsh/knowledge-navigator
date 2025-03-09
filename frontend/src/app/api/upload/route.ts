@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
-import getEnvVar from '@/lib/getEnvVar';
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,15 +14,9 @@ export async function POST(req: NextRequest) {
     for (const file of files) {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('metadata', JSON.stringify({
-        originalName: file.name,
-        size: file.size,
-        type: file.type,
-        lastModified: file.lastModified,
-      }));
 
       try {
-        const uploadResponse = await fetch(`${getEnvVar("BACKEND_URL")}/upload`, {
+        const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/upload`, {
           method: 'POST',
           body: formData,
         });

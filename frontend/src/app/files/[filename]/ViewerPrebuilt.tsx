@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
-import getEnvVar from '@/lib/getEnvVar';
 
 export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -12,7 +11,7 @@ export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
   const fetchDefinition = async (word: string) => {
     try {
       const response = await axios.get(
-        `${getEnvVar("BACKEND_URL")}/${encodeURIComponent(word)}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/${encodeURIComponent(word)}`
       );
       return response.data.extract || 'Definition not found';
     } catch (error) {

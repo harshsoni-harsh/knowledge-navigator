@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import getEnvVar from '@/lib/getEnvVar';
 
 export function Dashboard() {
   const [query, setQuery] = useState('');
@@ -25,7 +24,7 @@ export function Dashboard() {
 
     if (query) {
       const retrieveResponse = await fetch(
-        `${getEnvVar("BACKEND_URL")}/retrieve?question=${encodeURIComponent(query)}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/retrieve?question=${encodeURIComponent(query)}`
       );
 
       if (retrieveResponse.ok) {
@@ -38,8 +37,6 @@ export function Dashboard() {
           const { done, value } = (await reader?.read()) || {};
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
-
-          console.log(buffer);
 
           let boundary = buffer.indexOf('\n');
           while (boundary !== -1) {

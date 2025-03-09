@@ -1,6 +1,6 @@
 import os
 import logging
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, HTTPException
 from config import UPLOAD_DIRECTORY
 from utils import extract_text_from_pdf
 from embeddings import generate_embeddings
@@ -38,6 +38,6 @@ async def upload_file(file: UploadFile = File(...)):
         logger.info("Embeddings generated successfully!")
     except Exception as e:
         logger.error(f"Error generating embeddings: {e}")
-        return {"error": "Embedding generation failed"}
+        raise HTTPException(status_code=500, detail="Embedding generation failed")
 
-    return {"filePath": file_location}
+    return file.filename

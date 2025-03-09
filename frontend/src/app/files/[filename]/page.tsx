@@ -1,6 +1,5 @@
 'use client';
 
-import { join } from 'path';
 import { PageLayout } from '@/components/page-layout';
 import ViewerPrebuilt from './ViewerPrebuilt';
 import { use, useEffect, useState } from 'react';

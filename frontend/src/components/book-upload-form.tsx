@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { addFileMetadata } from '@/app/actions';
 
 export function BookUploadForm() {
   const [files, setFiles] = useState<File[]>([]);
@@ -48,15 +49,38 @@ export function BookUploadForm() {
 
     try {
       const formData = new FormData();
+      const uploadPromises: Promise<string>[] = [];
+
       files.forEach((file) => {
-        formData.append('books', file);
+        if (file.type !== 'application/pdf') return;
+        uploadPromises.push(
+          new Promise(async (res, rej) => {
+            try {
+              const id = await addFileMetadata({
+                name: file.name,
+                created_at: file.lastModified.toString(),
+                modified_at: file.lastModified.toString(),
+                year: new Date(file.lastModified).getFullYear().toString(),
+                size: file.size.toString(),
+                author: 'Unknown'
+              });
+              const renamedFile = new File([file], `${id}.pdf`)
+              formData.append('books', renamedFile);
+              res(file.name);
+            } catch (err) {
+              rej(err);
+            }
+          })
+        )
       });
+      
+      await Promise.all(uploadPromises);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
-
+      
       if (!response.ok) {
         throw new Error('Upload failed. Please try again.');
       }

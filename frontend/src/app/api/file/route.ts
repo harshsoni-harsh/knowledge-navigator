@@ -1,4 +1,3 @@
-import getEnvVar from '@/lib/getEnvVar';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
@@ -14,7 +13,7 @@ export async function GET(req: NextRequest) {
     }
 
     const response = await fetch(
-      `${getEnvVar('BACKEND_URL')}/retrieve-file?filename=${filename}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/retrieve-file?filename=${filename}`
     );
 
     if (!response.ok) throw new Error(`${response.status}`);
