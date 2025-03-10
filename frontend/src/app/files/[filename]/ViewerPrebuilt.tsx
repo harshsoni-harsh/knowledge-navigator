@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { fetchPromptResponse } from '@/app/actions';
 
 export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
