@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { fetchPromptResponse } from '@/app/actions';
 
 export function Dashboard() {
   const [query, setQuery] = useState('');
@@ -23,43 +24,14 @@ export function Dashboard() {
     setSearchResults('');
 
     if (query) {
-      const retrieveResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/retrieve?question=${encodeURIComponent(query)}`
-      );
-
-      if (retrieveResponse.ok) {
+      try {
+        const res = await fetchPromptResponse(query);
+        setSearchResults(res);
+      } catch (err) {
+        console.error(err);
+        alert('Check your console error');
+      } finally {
         setIsSearching(false);
-        const reader = retrieveResponse.body?.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = (await reader?.read()) || {};
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-
-          let boundary = buffer.indexOf('\n');
-          while (boundary !== -1) {
-            const line = buffer.substring(0, boundary).trim();
-            buffer = buffer.substring(boundary + 1);
-
-            if (line) {
-              try {
-                const data = JSON.parse(line);
-                if (data.answer) {
-                  setSearchResults((prev) =>
-                    prev ? `${prev}${data.answer}` : data.answer
-                  );
-                }
-              } catch (e) {
-                console.error('Error parsing streamed data:', e);
-              }
-            }
-            boundary = buffer.indexOf('\n');
-          }
-        }
-      } else {
-        console.error('Failed to retrieve:', retrieveResponse.statusText);
       }
     }
   };

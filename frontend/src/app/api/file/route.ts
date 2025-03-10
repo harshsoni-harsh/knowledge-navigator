@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/retrieve-file?filename=${filename}`
+      `${process.env.BACKEND_URL}/retrieve-file?filename=${filename}`
     );
 
     if (!response.ok) throw new Error(`${response.status}`);

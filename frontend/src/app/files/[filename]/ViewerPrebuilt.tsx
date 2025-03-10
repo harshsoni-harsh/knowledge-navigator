@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { fetchPromptResponse } from '@/app/actions';
 
 export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -10,10 +11,9 @@ export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
   // Fetch selected text meaning
   const fetchDefinition = async (word: string) => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/${encodeURIComponent(word)}`
+      return await fetchPromptResponse(
+        `${encodeURIComponent(word)}`
       );
-      return response.data.extract || 'Definition not found';
     } catch (error) {
       if (error) return 'Definition not found';
     }
@@ -32,7 +32,7 @@ export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
 
       if (selectedText.length > 0) {
         const definition = await fetchDefinition(selectedText);
-        tooltip.textContent = `${selectedText}: ${definition}`;
+        tooltip.textContent = `${definition}`;
 
         // Use the iframe's scroll offsets instead of the parent window's
         tooltip.style.left = `${rect.left + iframe.contentWindow.scrollX}px`;

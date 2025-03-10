@@ -12,8 +12,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    env_file:
-      - .env
+    environment:
+      - BACKEND_URL="http://host.docker.internal:8000"
+      - NEXT_PUBLIC_BACKEND_URL="http://localhost:8000"
+      - DATABASE_URL="postgresql://myuser:secret@db:5432/postgres?schema=public"
     extra_hosts:
     - "host.docker.internal:host-gateway"
   db:
