@@ -7,7 +7,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnablePassthrough
 from langchain_core.runnables.base import RunnableParallel
 from langchain.schema.output_parser import StrOutputParser
-from models import hf_pipe
+from models import llm
 from embeddings import vector_store
 from utils import tokenize_and_format
 import gc, torch
@@ -36,7 +36,7 @@ async def retrieve_from_path(question: str = Query(...)):
             rag_chain = (
                 RunnableParallel({"context": retriever, "question": RunnablePassthrough()})
                 | prompt
-                | hf_pipe
+                | llm
                 | StrOutputParser()
             )
 
