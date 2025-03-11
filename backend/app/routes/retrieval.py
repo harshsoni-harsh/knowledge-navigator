@@ -9,7 +9,7 @@ from langchain_core.runnables.base import RunnableParallel
 from langchain.schema.output_parser import StrOutputParser
 from models import llm
 from embeddings import vector_store
-from utils import tokenize_and_format
+from utils import tokenize_and_format,get_tavily_client
 import gc, torch
 
 router = APIRouter()
@@ -22,6 +22,10 @@ async def retrieve_from_path(question: str = Query(...)):
     async def answer_generator() -> AsyncGenerator[str, None]:
         try:
             logger.info(f"Received question: {question}")
+
+            tavily_response = get_tavily_client(question)['answer']
+
+            #answer contains llm response to query using tavily
 
             prompt = ChatPromptTemplate.from_template("""
                 <|system|>
@@ -41,6 +45,10 @@ async def retrieve_from_path(question: str = Query(...)):
             )
 
             result = rag_chain.invoke(question)
+
+            result = 'Global Search : ' + tavily_response + '\n\n Context Based Search: ' + result
+
+            #tavily_response and context based (groq) search combined
 
             answer_start = result.find("Answer:")
             if answer_start != -1:
