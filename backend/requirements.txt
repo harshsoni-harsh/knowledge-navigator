@@ -10,3 +10,5 @@ python-multipart
 accelerate
 tavily-python
 langchain-groq
+pinecone
+langchain-pinecone

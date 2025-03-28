@@ -16,5 +16,5 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
 groq_api_key = os.environ.get("GROQ_API_KEY")
 llm = ChatGroq(
     groq_api_key=groq_api_key,
-    model_name='mixtral-8x7b-32768'
+    model_name='llama-3.3-70b-versatile'
 )
