@@ -1,4 +1,11 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+tavily_api_key = os.environ.get("TAVILY_API_KEY")
+pinecone_api_key = os.environ.get("PINECONE_API_KEY")
+pinecone_environment = os.environ.get("PINECONE_ENVIRONMENT")
 
 # Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

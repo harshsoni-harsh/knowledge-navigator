@@ -8,7 +8,7 @@ from langchain.schema.runnable import RunnablePassthrough
 from langchain_core.runnables.base import RunnableParallel
 from langchain.schema.output_parser import StrOutputParser
 from models import llm
-from embeddings import vector_store
+from embeddings import pinecone_vector_store
 from utils import tokenize_and_format,get_tavily_client
 import gc, torch
 
@@ -35,7 +35,7 @@ async def retrieve_from_path(question: str = Query(...)):
                     <|user|> Question: {question} <|assistant|> Answer:
             """)
 
-            retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+            retriever = pinecone_vector_store.as_retriever(search_kwargs={"k": 3})
 
             rag_chain = (
                 RunnableParallel({"context": retriever, "question": RunnablePassthrough()})
