@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { fetchPromptResponse } from '@/app/actions';
 
-export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
+export default function ViewerPrebuilt({ pdfPath, searchOnSelect }: { pdfPath: string, searchOnSelect: boolean }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
@@ -38,7 +38,7 @@ export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
     const tooltip = tooltipRef.current;
     if (!tooltip || !iframe?.contentWindow) return;
     const selection = iframe.contentWindow.getSelection();
-    if (selection && selection.toString().trim()) {
+    if (selection && selection.toString().trim() && searchOnSelect) {
       const selectedText = selection.toString().trim();
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
@@ -56,7 +56,7 @@ export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
       tooltip.style.display = 'none';
       tooltip.innerHTML = '';
     }
-  }, [iframeRef, tooltipRef]);
+  }, [iframeRef, tooltipRef, searchOnSelect]);
 
   const handleLoad = useCallback(() => {
     const iframe = iframeRef.current;

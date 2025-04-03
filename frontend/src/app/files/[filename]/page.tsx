@@ -3,6 +3,9 @@
 import { PageLayout } from '@/components/page-layout';
 import ViewerPrebuilt from './ViewerPrebuilt';
 import { use, useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 export default function Page({
   params,
@@ -11,6 +14,7 @@ export default function Page({
 }) {
   const { filename } = use(params);
   const [fileExists, setFileExists] = useState(true);
+  const [searchOnSelect, setSearchOnSelect] = useState(false);
 
   const pdfPath = `/api/file?filename=${encodeURIComponent(filename)}`;
 
@@ -27,10 +31,17 @@ export default function Page({
     checkFile();
   }, [pdfPath]);
 
+  const AIButton = (
+    <div className='flex gap-2 ml-auto items-center pr-4'>
+      <Label htmlFor="ai-mode" className='font-bold'>AI Explainer</Label>
+      <Switch id="ai-mode" checked={searchOnSelect} onCheckedChange={setSearchOnSelect}  />
+    </div>
+  )
+
   return (
-    <PageLayout title="PDF Viewer">
+    <PageLayout title="PDF Viewer" secondaryElement={AIButton}>
       {fileExists ? (
-        <ViewerPrebuilt {...{ pdfPath }} />
+        <ViewerPrebuilt {...{ pdfPath, searchOnSelect }} />
       ) : (
         <div className="size-full grid place-items-center">File not found</div>
       )}
