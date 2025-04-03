@@ -10,9 +10,10 @@ export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
   // Fetch selected text meaning
   const fetchDefinition = async (word: string) => {
     try {
-      return await fetchPromptResponse(
+      const definition = await fetchPromptResponse(
         `${encodeURIComponent(word)}`
       );
+      return definition
     } catch (error) {
       if (error) return 'Definition not found';
     }
@@ -30,8 +31,18 @@ export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
       const rect = range.getBoundingClientRect();
 
       if (selectedText.length > 0) {
-        const definition = await fetchDefinition(selectedText);
-        tooltip.textContent = `${definition}`;
+        const definition = await fetchDefinition(selectedText) ?? '';
+        const formattedHTML = definition
+          .replaceAll("&nbsp;", " ")
+          .split(/<br\s*\/?>/)
+          .map((line: string) =>
+            line.replace(
+              /(https?:\/\/[^\s)]+)/g,
+              `<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">$1</a>`
+            )
+          )
+          .join("<p></p>");
+        tooltip.innerHTML = formattedHTML;
 
         // Use the iframe's scroll offsets instead of the parent window's
         tooltip.style.left = `${rect.left + iframe.contentWindow.scrollX}px`;
@@ -41,7 +52,7 @@ export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
     } else {
       tooltip.style.display = 'none';
     }
-  }, []);
+  }, [iframeRef, tooltipRef]);
 
   const handleLoad = useCallback(() => {
     const iframe = iframeRef.current;
@@ -69,19 +80,20 @@ export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    iframe.addEventListener('load', handleLoad);
-    return () => {
-      const tooltip = tooltipRef.current;
-      if (tooltip) tooltip.remove(); // Clean up tooltip from the DOM
-      iframe.removeEventListener('load', handleLoad);
-    };
+    if (iframe.contentDocument?.readyState === 'complete') {
+      handleLoad();
+    } else {
+      iframe.addEventListener('load', handleLoad);
+      return () => iframe.removeEventListener('load', handleLoad);
+    }
   }, [pdfPath, handleLoad]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <iframe
         ref={iframeRef}
-        className="h-full"
+        onLoad={handleLoad}
+        className="h-full relative"
         src={`/pdfjs/web/viewer.html?file=${pdfPath}`}
         style={{ width: '100%', height: '100%', border: 'none' }}
       />
