@@ -56,8 +56,9 @@ export default function ViewerPrebuilt({ pdfPath, searchOnSelect }: { pdfPath: s
 
       if (selectedText.length > 0) {
         // Set tooltip content
-        tooltip.innerHTML = await fetchDefinition(selectedText) ?? '';
+        tooltip.innerHTML = 'Loading...'
         tooltip.style.display = 'block';
+        tooltip.innerHTML = await fetchDefinition(selectedText) ?? '';
 
         let referenceEl = referenceElRef.current;
         if (!referenceEl) {
@@ -142,7 +143,11 @@ export default function ViewerPrebuilt({ pdfPath, searchOnSelect }: { pdfPath: s
         content=''
       >
       </iframe>
-      <div ref={tooltipRef} className='absolute top-0 left-0 bg-white border-2 p-2 border-zinc-200 rounded-md max-w-96 max-h-96 overflow-auto text-black'></div>
+      <div
+        ref={tooltipRef}
+        style={{ display: 'none' }}
+        className='absolute top-0 left-0 bg-zinc-300 border-2 p-2 border-zinc-600 rounded-md max-w-96 max-h-96 overflow-auto text-black'
+      />
     </div>
   );
 }
