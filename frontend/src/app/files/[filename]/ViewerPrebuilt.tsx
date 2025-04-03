@@ -2,13 +2,16 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import { fetchPromptResponse } from '@/app/actions';
+import { createPopper, Instance as PopperInstance } from '@popperjs/core';
 
 export default function ViewerPrebuilt({ pdfPath, searchOnSelect }: { pdfPath: string, searchOnSelect: boolean }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const popperInstanceRef = useRef<PopperInstance | null>(null);
+  const referenceElRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch selected text meaning
-  const fetchDefinition = async (word: string) => {
+  const fetchDefinition = useCallback(async (word: string) => {
     const definition = await (async (word: string) => {
       try {
         const definition = await fetchPromptResponse(
@@ -30,13 +33,21 @@ export default function ViewerPrebuilt({ pdfPath, searchOnSelect }: { pdfPath: s
         )
       )
       .join("<p></p>");
-  };
+  }, []);
+
+  const onScroll = useCallback(() => {
+    popperInstanceRef.current?.update();
+    if (tooltipRef.current) {
+      tooltipRef.current.style.display = "none";
+      tooltipRef.current.innerHTML = '';
+    }
+  }, [popperInstanceRef, tooltipRef]);
 
   // Handle text selection inside the iframe
   const handleTextSelection = useCallback(async () => {
     const iframe = iframeRef.current;
     const tooltip = tooltipRef.current;
-    if (!tooltip || !iframe?.contentWindow) return;
+    if (!tooltip || !iframe?.contentWindow || !iframe.contentDocument) return;
     const selection = iframe.contentWindow.getSelection();
     if (selection && selection.toString().trim() && searchOnSelect) {
       const selectedText = selection.toString().trim();
@@ -44,17 +55,57 @@ export default function ViewerPrebuilt({ pdfPath, searchOnSelect }: { pdfPath: s
       const rect = range.getBoundingClientRect();
 
       if (selectedText.length > 0) {
-        tooltip.style.display = 'none';
+        // Set tooltip content
         tooltip.innerHTML = await fetchDefinition(selectedText) ?? '';
-
-        // Use the iframe's scroll offsets instead of the parent window's
-        tooltip.style.left = `${rect.left + iframe.contentWindow.scrollX}px`;
-        tooltip.style.top = `${rect.top + iframe.contentWindow.scrollY - 40}px`;
         tooltip.style.display = 'block';
+
+        let referenceEl = referenceElRef.current;
+        if (!referenceEl) {
+          referenceEl = iframe.contentDocument.createElement('div');
+          referenceEl.style.position = 'absolute';
+          referenceEl.style.width = '0px';
+          referenceEl.style.height = '0px';
+          iframe.contentDocument.body.appendChild(referenceEl);
+          referenceElRef.current = referenceEl;
+        }
+
+        referenceEl.style.left = `${rect.left + iframe.contentWindow.scrollX}px`;
+        referenceEl.style.top = `${rect.top + iframe.contentWindow.scrollY}px`;
+
+        if (popperInstanceRef.current) {
+          popperInstanceRef.current.destroy();
+        }
+
+        popperInstanceRef.current = createPopper(referenceEl, tooltip, {
+          placement: 'auto',
+          modifiers: [
+            {
+              name: 'flip',
+              options: {
+                fallbackPlacements: ['top', 'bottom', 'right', 'left'],
+              },
+            },
+            {
+              name: 'offset',
+              options: {
+                offset: [10, 30],
+              },
+            },
+          ],
+        });
+        iframe.contentWindow.addEventListener('scroll', onScroll);
       }
-    } else {
+    } else if (tooltip) {
       tooltip.style.display = 'none';
       tooltip.innerHTML = '';
+      if (popperInstanceRef.current) {
+        popperInstanceRef.current.destroy();
+        popperInstanceRef.current = null;
+      }
+      if (referenceElRef.current) {
+        referenceElRef.current.remove();
+        referenceElRef.current = null;
+      }
     }
   }, [iframeRef, tooltipRef, searchOnSelect]);
 
@@ -62,19 +113,7 @@ export default function ViewerPrebuilt({ pdfPath, searchOnSelect }: { pdfPath: s
     const iframe = iframeRef.current;
     const iframeWindow = iframe?.contentWindow;
     const iframeDocument = iframe?.contentDocument;
-    if (!iframeWindow || !iframeDocument) return;
-
-    // Create tooltip element (only once)
-    const tooltipElement = document.createElement('div');
-    tooltipElement.className = 'tooltipAnnotation';
-    tooltipElement.style.position = 'absolute';
-    tooltipElement.style.background = 'white';
-    tooltipElement.style.border = '2px solid black';
-    tooltipElement.style.padding = '5px';
-    tooltipElement.style.zIndex = '10000';
-    tooltipElement.style.display = 'none';
-    iframeDocument.body.appendChild(tooltipElement);
-    tooltipRef.current = tooltipElement;
+    if (!iframeWindow || !iframeDocument) return
 
     // Add event listener for text selection
     iframeDocument.addEventListener('mouseup', handleTextSelection);
@@ -100,7 +139,10 @@ export default function ViewerPrebuilt({ pdfPath, searchOnSelect }: { pdfPath: s
         className="h-full relative"
         src={`/pdfjs/web/viewer.html?file=${pdfPath}`}
         style={{ width: '100%', height: '100%', border: 'none' }}
-      />
+        content=''
+      >
+      </iframe>
+      <div ref={tooltipRef} className='absolute top-0 left-0 bg-white border-2 p-2 border-zinc-200 rounded-md max-w-96 max-h-96 overflow-auto text-black'></div>
     </div>
   );
 }
