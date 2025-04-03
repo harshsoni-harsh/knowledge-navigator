@@ -12,11 +12,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { fetchPromptResponse } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
 
 export function Dashboard() {
   const [query, setQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<string>('');
+  const { toast } = useToast()
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +31,7 @@ export function Dashboard() {
         setSearchResults(res);
       } catch (err) {
         console.error(err);
-        alert('Check your console error');
+        toast({title: 'Check your console error'});
       } finally {
         setIsSearching(false);
       }
@@ -37,8 +39,7 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-w-full">
-      <Card className="min-w-full">
+      <Card className="my-6 mx-4">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">
             Explore Your Library
@@ -100,6 +101,5 @@ export function Dashboard() {
           )}
         </CardContent>
       </Card>
-    </div>
   );
 }

@@ -14,7 +14,8 @@ torch.cuda.empty_cache()
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
 
 groq_api_key = os.environ.get("GROQ_API_KEY")
+groq_model_name = os.environ.get("GROQ_MODEL_NAME")
 llm = ChatGroq(
     groq_api_key=groq_api_key,
-    model_name='llama-3.3-70b-versatile'
+    model_name=groq_model_name
 )

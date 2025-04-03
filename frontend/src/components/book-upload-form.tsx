@@ -13,12 +13,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { addFileMetadata } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
 
 export function BookUploadForm() {
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const uploadRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
 
@@ -27,11 +29,11 @@ export function BookUploadForm() {
     if (selectedFiles) {
       const validFiles = Array.from(selectedFiles).filter((file) => {
         if (file.type !== 'application/pdf') {
-          alert(`File "${file.name}" is not a valid PDF.`);
+          toast({ title: `File "${file.name}" is not a valid PDF.` });
           return false;
         }
         if (file.size > MAX_FILE_SIZE) {
-          alert(`File "${file.name}" exceeds the size limit (100MB).`);
+          toast({ title: `File "${file.name}" exceeds the size limit (100MB).` });
           return false;
         }
         return true;
@@ -73,19 +75,19 @@ export function BookUploadForm() {
           })
         )
       });
-      
+
       await Promise.all(uploadPromises);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
-      
+
       if (!response.ok) {
         throw new Error('Upload failed. Please try again.');
       }
 
-      alert('Books uploaded successfully!');
+      toast({ title: 'Books uploaded successfully!' });
       setFiles([]);
       if (uploadRef.current) {
         uploadRef.current.value = '';
@@ -98,7 +100,7 @@ export function BookUploadForm() {
   };
 
   return (
-    <Card>
+    <Card className='my-6 mx-4'>
       <CardHeader>
         <CardTitle>Upload New Books</CardTitle>
         <CardDescription>Add multiple books to your library</CardDescription>

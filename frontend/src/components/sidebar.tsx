@@ -21,7 +21,6 @@ const navItems = [
   { icon: Home, label: 'Dashboard', href: '/' },
   { icon: Upload, label: 'Upload Files', href: '/upload' },
   { icon: Book, label: 'My Files', href: '/files' },
-  { icon: Settings, label: 'Settings', href: '/settings' },
 ];
 
 export function AppSidebar() {
@@ -29,9 +28,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r shrink-0 z-10 bg-inherit">
-      <SidebarHeader className="flex items-center justify-between px-4 py-2 mt-2">
+      <SidebarHeader className="flex items-center justify-between px-4 py-3 mt-2">
         <h2 className="text-lg font-semibold">Knowledge Navigator</h2>
-        {/* <SidebarTrigger className="hidden" /> */}
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

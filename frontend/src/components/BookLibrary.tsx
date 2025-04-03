@@ -48,7 +48,7 @@ export function BookLibrary() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 my-6 mx-4">
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-grow">
           <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />

@@ -9,14 +9,27 @@ export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
 
   // Fetch selected text meaning
   const fetchDefinition = async (word: string) => {
-    try {
-      const definition = await fetchPromptResponse(
-        `${encodeURIComponent(word)}`
-      );
-      return definition
-    } catch (error) {
-      if (error) return 'Definition not found';
-    }
+    const definition = await (async (word: string) => {
+      try {
+        const definition = await fetchPromptResponse(
+          `${encodeURIComponent(word)}`
+        );
+        return definition
+      } catch (error) {
+        if (error) return error instanceof Error ? error.message : error as string;
+      }
+    })(word);
+
+    return (definition ?? '')
+      .replaceAll("&nbsp;", " ")
+      .split(/<br\s*\/?>/)
+      .map((line: string) =>
+        line.replace(
+          /(https?:\/\/[^\s)]+)/g,
+          `<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">$1</a>`
+        )
+      )
+      .join("<p></p>");
   };
 
   // Handle text selection inside the iframe
@@ -31,18 +44,8 @@ export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
       const rect = range.getBoundingClientRect();
 
       if (selectedText.length > 0) {
-        const definition = await fetchDefinition(selectedText) ?? '';
-        const formattedHTML = definition
-          .replaceAll("&nbsp;", " ")
-          .split(/<br\s*\/?>/)
-          .map((line: string) =>
-            line.replace(
-              /(https?:\/\/[^\s)]+)/g,
-              `<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">$1</a>`
-            )
-          )
-          .join("<p></p>");
-        tooltip.innerHTML = formattedHTML;
+        tooltip.style.display = 'none';
+        tooltip.innerHTML = await fetchDefinition(selectedText) ?? '';
 
         // Use the iframe's scroll offsets instead of the parent window's
         tooltip.style.left = `${rect.left + iframe.contentWindow.scrollX}px`;
@@ -51,6 +54,7 @@ export default function ViewerPrebuilt({ pdfPath }: { pdfPath: string }) {
       }
     } else {
       tooltip.style.display = 'none';
+      tooltip.innerHTML = '';
     }
   }, [iframeRef, tooltipRef]);
 

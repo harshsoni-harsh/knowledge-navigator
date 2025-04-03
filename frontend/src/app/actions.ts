@@ -39,9 +39,12 @@ export async function fetchPromptResponse(prompt: string) {
           const data = JSON.parse(line);
           if (data.answer) {
             streamData += data.answer;
+          } else if (data.error) {
+            throw new Error(data.error)
           }
         } catch (e) {
           console.error('Error parsing streamed data:', e);
+          throw e;
         }
       }
       boundary = buffer.indexOf('\n');
