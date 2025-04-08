@@ -12,3 +12,4 @@ tavily-python
 langchain-groq
 pinecone
 langchain-pinecone
+neo4j

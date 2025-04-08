@@ -2,7 +2,7 @@
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from pine_util import get_pinecone_vectorstore
-from config import CACHE_DIR, pinecone_api_key, pinecone_environment
+from config import CACHE_DIR, pinecone_api_key, pinecone_environment, neo4j_uri, neo4j_username, neo4j_password, aura_instanceid, aura_instancename
 
 INDEX_NAME = "knowledge-navigator"
 
@@ -18,13 +18,3 @@ pinecone_vector_store = get_pinecone_vectorstore(
 
 async def generate_embeddings(chunks):
     await pinecone_vector_store.aadd_documents(chunks)
-
-# vector_store = Chroma(
-#     embedding_function=embeder,
-#     persist_directory="./chroma_langchain_db",
-#     collection_name="test_collection"
-# )
-
-# async def generate_embeddings(chunks):
-#     """Generate embeddings and store them in a ChromaDB vectorstore."""
-#     await vector_store.aadd_documents(chunks)
