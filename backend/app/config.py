@@ -26,3 +26,11 @@ MODEL_ID = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
 os.makedirs(MODEL_DIRECTORY, exist_ok=True)
 os.makedirs(TOKENIZER_DIRECTORY, exist_ok=True)
+
+# Get envs
+PINECONE_API_KEY = os.environ.get('PINECONE_API_KEY')
+PINECONE_ENV = os.environ.get('PINECONE_ENV')
+PINECONE_INDEX_NAME = os.environ.get('PINECONE_INDEX_NAME')
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_MODEL = os.getenv("GROQ_MODEL_NAME")
