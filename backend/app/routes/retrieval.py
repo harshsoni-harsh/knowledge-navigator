@@ -24,15 +24,15 @@ logger = logging.getLogger(__name__)
 async def retrieve_from_path(
     question: str = Query(...),
     prompt_type: str = Query(
-        "general", enum=["general", "suggested_readings", "flashcard_prompt"]
+        "general", enum=["general", "suggested-readings", "flashcards"]
     ),
 ):
     """Retrieve answers from stored embeddings."""
 
     prompt_map = {
         "general": general_prompt,
-        "suggested_readings": suggested_readings_prompt,
-        "flashcard_prompt": flashcard_prompt,
+        "suggested-readings": suggested_readings_prompt,
+        "flashcards": flashcard_prompt,
     }
     selected_prompt = prompt_map.get(prompt_type, general_prompt)
 
