@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import { fetchPromptResponse } from '@/app/actions';
+import { fetchPromptResponse } from '@/lib/retrieval';
 import { createPopper, Instance as PopperInstance } from '@popperjs/core';
 
 export default function ViewerPrebuilt({ pdfPath, searchOnSelect }: { pdfPath: string, searchOnSelect: boolean }) {

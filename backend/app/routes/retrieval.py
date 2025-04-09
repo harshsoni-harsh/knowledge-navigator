@@ -6,7 +6,8 @@ from typing import AsyncGenerator
 from ..prompt_templates import (
     general_prompt,
     suggested_readings_prompt,
-    flashcard_prompt,
+    cheatsheet_prompt,
+    qna_prompt
 )
 from langchain.schema.runnable import RunnablePassthrough, RunnableLambda
 from langchain_core.runnables.base import RunnableParallel
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 async def retrieve_from_path(
     question: str = Query(...),
     prompt_type: str = Query(
-        "general", enum=["general", "suggested-readings", "flashcards"]
+        "general", enum=["general", "suggested-readings", "cheatsheet", "qna"]
     ),
 ):
     """Retrieve answers from stored embeddings."""
@@ -32,7 +33,8 @@ async def retrieve_from_path(
     prompt_map = {
         "general": general_prompt,
         "suggested-readings": suggested_readings_prompt,
-        "flashcards": flashcard_prompt,
+        "cheatsheet": cheatsheet_prompt,
+        "qna": qna_prompt,
     }
     selected_prompt = prompt_map.get(prompt_type, general_prompt)
 

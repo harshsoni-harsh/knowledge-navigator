@@ -3,7 +3,6 @@
 import { PageLayout } from '@/components/page-layout';
 import ViewerPrebuilt from './ViewerPrebuilt';
 import { use, useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
