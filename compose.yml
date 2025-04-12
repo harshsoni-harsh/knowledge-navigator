@@ -4,30 +4,26 @@ services:
       context: ./frontend
       args:
         DATABASE_URL: ${DATABASE_URL}
-    container_name: knowledge-navigator-frontend
-    networks:
-      - kn-net
-    ports:
-      - 3000:3000
+    network_mode: host
     depends_on:
       db:
         condition: service_healthy
-    environment:
-      - BACKEND_URL=http://host.docker.internal:8000
-      - NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
-      - DATABASE_URL=postgresql://myuser:secret@db:5432/postgres?schema=public
+    env_file:
+      - .env
     extra_hosts:
     - "host.docker.internal:host-gateway"
+  backend:
+    build: 
+      context: ./backend
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+    network_mode: host
   db:
     image: postgres
     restart: always
-    networks:
-      - kn-net
-    ports:
-      - 5432:5432
-    environment:
-      - POSTGRES_USER=myuser
-      - POSTGRES_PASSWORD=secret
+    network_mode: host
+    env_file:
+      - .env
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

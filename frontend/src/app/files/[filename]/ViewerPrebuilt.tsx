@@ -108,7 +108,7 @@ export default function ViewerPrebuilt({ pdfPath, searchOnSelect }: { pdfPath: s
         referenceElRef.current = null;
       }
     }
-  }, [iframeRef, tooltipRef, searchOnSelect]);
+  }, [iframeRef, tooltipRef, searchOnSelect, fetchDefinition, onScroll]);
 
   const handleLoad = useCallback(() => {
     const iframe = iframeRef.current;

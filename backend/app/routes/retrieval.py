@@ -15,7 +15,6 @@ from langchain.schema.output_parser import StrOutputParser
 from models import llm
 from embeddings import pinecone_vector_store
 from utils import tokenize_and_format, get_tavily_client
-import gc, torch
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -82,6 +81,4 @@ async def retrieve_from_path(
             logger.error(f"Error in streaming generator: {e}")
             yield json.dumps({"error": "Error generating response"}) + "\n"
 
-    gc.collect()
-    torch.cuda.empty_cache()
     return StreamingResponse(answer_generator(), media_type="application/json")

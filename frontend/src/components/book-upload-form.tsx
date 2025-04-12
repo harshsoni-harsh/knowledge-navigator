@@ -13,14 +13,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { addFileMetadata } from '@/app/actions';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export function BookUploadForm() {
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const uploadRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
 
   const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
 
@@ -29,11 +28,11 @@ export function BookUploadForm() {
     if (selectedFiles) {
       const validFiles = Array.from(selectedFiles).filter((file) => {
         if (file.type !== 'application/pdf') {
-          toast({ title: `File "${file.name}" is not a valid PDF.` });
+          toast.error(`File "${file.name}" is not a valid PDF.`)
           return false;
         }
         if (file.size > MAX_FILE_SIZE) {
-          toast({ title: `File "${file.name}" exceeds the size limit (100MB).` });
+          toast.error(`File "${file.name}" exceeds the size limit (100MB).`)
           return false;
         }
         return true;
@@ -87,7 +86,7 @@ export function BookUploadForm() {
         throw new Error('Upload failed. Please try again.');
       }
 
-      toast({ title: 'Books uploaded successfully!' });
+      toast.success('Books uploaded successfully!');
       setFiles([]);
       if (uploadRef.current) {
         uploadRef.current.value = '';

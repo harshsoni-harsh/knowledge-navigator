@@ -12,7 +12,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { fetchPromptResponse } from '@/lib/retrieval';
-import { useToast } from '@/hooks/use-toast';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import parse from 'html-react-parser';
 import { marked } from 'marked';
@@ -23,6 +22,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { toast } from 'sonner';
 
 export function Dashboard() {
   const [query, setQuery] = useState('');
@@ -32,7 +32,6 @@ export function Dashboard() {
   const [reactContentByPrompt, setReactContentByPrompt] = useState<Record<string, React.ReactNode>>({});
   const searchButtonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast()
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +57,7 @@ export function Dashboard() {
         setResultsByPrompt(markdownMap);
       } catch (err) {
         console.error(err);
-        toast({ title: 'Check your console error' });
+        toast.error('Check your console error')
       } finally {
         setIsSearching(false);
       }

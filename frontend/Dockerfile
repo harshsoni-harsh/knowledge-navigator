@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:slim AS builder
 
 WORKDIR /app
 
@@ -16,4 +16,4 @@ RUN pnpm build
 
 EXPOSE 3000
 
-CMD pnpm prisma:migrate && pnpm start
+CMD ["sh", "-c", "pnpm prisma:migrate && pnpm start"]

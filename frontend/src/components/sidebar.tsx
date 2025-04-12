@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, Upload, Book, Settings } from 'lucide-react';
+import { Home, Upload, Book } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Sidebar,
